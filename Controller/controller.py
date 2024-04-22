@@ -11,7 +11,7 @@ class Controller:
     menu: Menu
     note: Note
     file: FileCSV = None
-    view: View = None
+    view: View = None 
 
     def __init__(self) -> None:
         self.menu = Menu("Записная книжка. v 1.0", [
@@ -32,7 +32,7 @@ class Controller:
                                 ]))
                         ])
         
-        self.view = View()
+        self.view = View() 
         self.file = FileCSV('notes.csv')
         self.note = self.file.load()
 
