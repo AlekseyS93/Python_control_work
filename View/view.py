@@ -1,94 +1,60 @@
-from View.ansi import *
+'''
+    Класс UI, в данном случае консоль
+'''
 
+import datetime
 
-class MenuItem:
-    def __init__(self, id: int, text: str, submenu = None):
-        self._id = id
-        self._text = text
-        self._submenu = submenu     # ссылка на Menu
-
-    @property
-    def id(self):
-        return self._id
-
-    @property
-    def submenu(self):
-        return self._submenu
+class View:
     
+    def cls(self) -> None:
+        print("\033c")
 
-    def __repr__(self) -> str:
-        s = self._text.ljust(30)
-        if (self._submenu is not None):
-            s += '-->'
-        else:
-            s += '   '
-            
-        return s
+    def output(self, *text) -> None:
+        res = ''
+        for s in text:
+            res += str(s)
+        print(res)
+
+    def clsout(self, *text) -> None:
+        self.cls()
+        self.output(*text)
+        
+    def out_wait(self, is_cls: bool, *obj, text: str) -> None:
+        if is_cls:
+            self.cls()
+        self.output(*obj)
+        if text != '\n' and text != '':
+            text += ', '
+        self.output(text, 'нажмите Enter для продолжения.')
+        self.input()
 
     
-class Menu:
-    head: list[MenuItem]
-    active = None
-    prev = None
-    text: str
+    def input(self, text: str = '') -> str:
+        try:
+            return input(text)
 
-    def __init__(self, text: str, lst: list[MenuItem] = []):
-        self.text = text
-        self.head = lst
-        self.active = self
-        self.prev = None
-        
-    def append(self, item: MenuItem):
-        self.active.head.append(item)
-        
-    def show(self):
-        idx = 1
-        cls()
-        if self.active.text is not None:
-            print(ANSI_BLUE_BACKGROUND, self.active.text, ANSI_BLACK_BACKGROUND, "\n")
-        for n in self.active.head:
-            print(f'{idx}. {n}')
-            idx += 1
-        if self.active.prev is None:
-            print("0. Выход")
-        else:
-            print("0. Назад")
-            
-    def select(self, index: int) -> int:
-        if index < len(self.active.head):
-            sm = self.active.head[index]
-            if sm.submenu is not None:
-                sm.submenu.prev = self.active
-                self.active = sm.submenu
-            else:
-                return sm.id
-        return None
+        except KeyboardInterrupt:
+            return None
+        except EOFError:
+            return None
+        except ValueError:
+            return None
 
-    def back(self):
-        if self.active.prev is not None:
-            self.active = self.active.prev
-     
-    #
-    # Процесс меню, на выходе: код выбранного меню, или 0, если пользователь захотел выйти из программы
-    #
-    def run(self) -> int:
-        while True:
-            self.show()
-            try:
-                print(">", end = "")
-                key = int(input())
-                if key == 0:
-                    if self.active.prev is None:
-                        return 0
-                    self.back()
-                else:
-                    key -= 1
-                    if self.select(key) is not None:
-                        return self.active.head[key].id
-            except KeyboardInterrupt:
-                continue
-            except EOFError:
-                continue
-            except ValueError:
-                continue
-            
+
+    def input_data(self, str_date = '', str_time = '', default = datetime.datetime.today()) -> datetime.datetime:
+        try:
+            sdate = input(str_date)
+            stime = input(str_time)
+        
+            if len(sdate) == 0:
+                sdate = f'{default.day:02d}.{default.month:02d}.{default.year}'
+            if len(stime) == 0:
+                stime = f'{default.hour:02d}:{default.minute:02d}'
+            return datetime.datetime.strptime(f'{sdate} {stime}', '%d.%m.%Y %H:%M')
+        
+        except KeyboardInterrupt:
+            return None
+        except EOFError:
+            return None
+        except ValueError:
+            return None
